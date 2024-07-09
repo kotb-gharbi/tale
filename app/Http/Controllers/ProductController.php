@@ -108,10 +108,10 @@ class ProductController extends Controller
         $product = Product::find($id);
 
         if (!$product) {
-            return redirect()->route('products.index')->with('error', 'Product not found');
+            return response()->json(["message" => "Product not found"]);
         }
 
-        return view('edit_product', compact('product'));
+        return response()->json($product);
     }
 
 
