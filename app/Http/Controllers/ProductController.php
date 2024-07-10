@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Product;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class ProductController extends Controller
 {
@@ -41,11 +42,13 @@ class ProductController extends Controller
     }
 
     public function UpdateProduct(Request $request,int $id){
-
+        
+        Log::info($request->all());
+        Log::info($request->file('image'));
         $data = $request->validate([
             'description' => 'required',
             'price' => ['required','numeric'],
-            'image' => ['mimes:png,jpeg,jpg','max:2048']
+            'image' => ['required','mimes:png,jpeg,jpg','max:2048']
         ]);
 
         $product = Product::find($id);
@@ -86,12 +89,12 @@ class ProductController extends Controller
 
         $file_path = public_path('uploads');
 
-        //deletes image from uploads directory
+        //delete image from uploads folder
         if(file_exists($file_path . '/' . $product->image)){
             unlink($file_path . '/' . $product->image);
         }
 
-        //deletes product from database
+        //delete product from database
         $product->delete();
 
         return response()->json(["message" => "Product deleted successfully"]);

@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\Hash;
 class AuthController extends Controller
 {
 
-    public function Register_to_backoffice(Request $request){
+    public function AddUser(Request $request){
         
         $data = $request->validate([
             'name' => 'required|string',
