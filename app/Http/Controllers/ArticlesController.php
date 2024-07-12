@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Article;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class ArticlesController extends Controller
 {
@@ -78,43 +79,49 @@ class ArticlesController extends Controller
 
     }
 
-    public function UpdateArticle(Request $request , int $id){
-
+    public function UpdateArticle(Request $request, int $id) {
+        Log::info('UpdateArticle request data: ', $request->all());
+    
         $data = $request->validate([
             'title' => ['required', 'string'],
             'description' => ['required', 'string'],
-            'image' => ['required','mimes:png,jpeg,jpg','max:2048'],
-            'price' => ['required' , 'numeric']
+            'image' => ['required', 'mimes:png,jpeg,jpg', 'max:2048'],
+            'price' => ['required', 'numeric']
         ]);
-
-
+    
+        // Find the article
         $article = Article::find($id);
-
-        if(!$article){
+    
+        if (!$article) {
             return response()->json(["message" => "Article not found"]);
         }
-
-        
-        $path = public_path('uploads');
-
-        if($request->hasFile('image')){
+    
+        //Handle image upload if present
+        if ($request->hasFile('image')) {
             $file = $request->file('image');
             $filename = time() . '_' . $file->getClientOriginalName();
+            $path = public_path('uploads');
             $file->move($path, $filename);
-            $data = $request->except('image');
-            $data['image'] = $filename;
-
-            //delete old image from uploads directory
-            if(file_exists($path . '/' . $article->image)){
+    
+            // Delete the old image
+            if (file_exists($path . '/' . $article->image)) {
                 unlink($path . '/' . $article->image);
             }
 
-            //update article data
-            $article->update($data);
+            //Update data with new image filename
+            $data['image'] = $filename;
 
-            return response()->json(["message" => "article updated successfully"]);
+            $article->update($data);
+    
+            return response()->json(["message" => "Article updated successfully"]);
+
         }
+        
+        $data['image'] = $article->image;
+
+        return response()->json(["message" => "Problem updating the article"]);
     }
+    
 }
     
 

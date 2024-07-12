@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Models\Product;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Log;
 
 class ProductController extends Controller
 {
@@ -43,8 +42,6 @@ class ProductController extends Controller
 
     public function UpdateProduct(Request $request,int $id){
         
-        Log::info($request->all());
-        Log::info($request->file('image'));
         $data = $request->validate([
             'description' => 'required',
             'price' => ['required','numeric'],

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Role;
 use App\Models\User;
 use Firebase\JWT\JWT;
 use Illuminate\Http\Request;
@@ -13,9 +14,11 @@ class AuthController extends Controller
     public function AddUser(Request $request){
         
         $data = $request->validate([
-            'name' => 'required|string',
-            'email' => 'required|string|email|unique:users',
-            'password' => 'required|string'
+            'name' => ['required','string'],
+            'email' => 'required','string','email|unique:users',
+            'password' => ['required','string'],
+            'roles' => ['required','array'],
+            'roles.*' => 'exists:roles,name' 
         ]);
 
         $data['password'] = bcrypt($data['password']);
@@ -23,6 +26,11 @@ class AuthController extends Controller
         $user = User::create($data);
         
         if($user){
+            
+            $roleIds = Role::whereIn('name', $data['roles'])->pluck('id')->toArray();
+
+            $user->roles()->attach($roleIds);
+
             return response()->json(["message" => "User created successfully"]);
         }
 
@@ -117,6 +125,61 @@ class AuthController extends Controller
 
         return response()->json(["message" => "Password changed successfully"]);
 
+        
+    }
+
+    public function EditRoles(Request $request,$id){
+
+        $data = $request->validate([
+            'roles' => ['required','array'],
+            'roles.*' => 'exists:roles,name'
+        ]);
+
+        $roleIds = Role::whereIn('name' , $data['roles'])->pluck('id')->toArray();
+
+        $user = User::find($id);
+
+        if($user){
+            $user->roles()->sync($roleIds);
+
+            return response()->json(["message" => "Roles updated successfully"]);
+        }
+
+        return response()->json(["message" => "User not found"]);
+        
+
+    }
+
+    public function DeleteUser($id){
+
+        $user = User::find($id);
+
+        if($user){
+
+            $user->delete();
+
+            //detach all roles associated with that user
+            $user->roles()->detach();
+
+            return response()->json(["message" => "User deleted successfully"]);
+        }
+
+        return response()->json(["message" => "User not found"]);
+    }
+
+    public function DeactivateUser($id){
+
+        $user = User::find($id);
+
+        if($user){
+
+            //detach all roles
+            $user->roles()->detach();
+
+            return response()->json(["message" => "All roles removed from user successfully."]);
+        }
+
+        return response()->json(["message" => "User not found."]);
         
     }
 }
