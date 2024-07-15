@@ -14,6 +14,7 @@ Route::group(['middleware' => 'jwt.auth'], function () {
     //Admin routes
     Route::post('/register', [AuthController::class,'AddUser'])->middleware('roles:admin');
     Route::post('/edit-roles/{id}', [AuthController::class,'EditRoles'])->middleware('roles:admin');
+    Route::put('/edit-user/{id}' ,[AuthController::class , 'EditUser'])->middleware('roles:admin');
     Route::delete('/delete_user/{id}', [AuthController::class,'DeleteUser'])->middleware('roles:admin');
     Route::delete('/deactivate_user/{id}', [AuthController::class,'DeactivateUser'])->middleware('roles:admin');
     //Products related routes

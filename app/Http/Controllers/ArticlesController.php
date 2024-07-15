@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Models\Article;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Log;
 
 class ArticlesController extends Controller
 {
@@ -80,7 +79,6 @@ class ArticlesController extends Controller
     }
 
     public function UpdateArticle(Request $request, int $id) {
-        Log::info('UpdateArticle request data: ', $request->all());
     
         $data = $request->validate([
             'title' => ['required', 'string'],

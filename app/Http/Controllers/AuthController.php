@@ -6,6 +6,7 @@ use App\Models\Role;
 use App\Models\User;
 use Firebase\JWT\JWT;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\Hash;
 
 class AuthController extends Controller
@@ -14,11 +15,11 @@ class AuthController extends Controller
     public function AddUser(Request $request){
         
         $data = $request->validate([
-            'name' => ['required','string'],
-            'email' => 'required','string','email|unique:users',
-            'password' => ['required','string'],
-            'roles' => ['required','array'],
-            'roles.*' => 'exists:roles,name' 
+            'name' => ['required', 'string'],
+            'email' => ['required', 'string', 'email', 'unique:users'],
+            'password' => ['required', 'string'],
+            'roles' => ['required', 'array'],
+            'roles.*' => 'exists:roles,name'
         ]);
 
         $data['password'] = bcrypt($data['password']);
@@ -181,5 +182,34 @@ class AuthController extends Controller
 
         return response()->json(["message" => "User not found."]);
         
+    }
+
+    public function EditUser(Request $request, int $id){
+
+        $user = User::find($id);
+        
+        $data = $request->validate([
+            'name' => ['required', 'string'],
+            'email' => ['required', 'string', 'email', Rule::unique('users')->ignore($user->id)],
+            'password' => ['required', 'string'],
+            'roles' => ['required', 'array'],
+            'roles.*' => 'exists:roles,name'
+        ]);
+
+        $data['password'] = bcrypt($data['password']);
+
+
+        if(!$user){
+            return response()->json(["message" => "User not found"]);
+        }
+
+        $roleIds = Role::whereIn('name' , $data['roles'])->pluck('id')->toArray();
+        
+        $user->roles()->sync($roleIds);
+
+        $user->update($data);
+
+        return response()->json(["message" => "User updated successfully"]);
+
     }
 }
