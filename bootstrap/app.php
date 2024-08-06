@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Middleware\CheckJsonContentType;
 use App\Http\Middleware\RolesMiddleware;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
@@ -14,7 +15,8 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware) {
         $middleware->alias([
-            'roles' => RolesMiddleware::class
+            'roles' => RolesMiddleware::class,
+            'json' => CheckJsonContentType::class
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {

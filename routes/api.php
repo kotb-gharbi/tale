@@ -6,8 +6,8 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ProductController;
 
 //Open routes
+Route::post('/login', [AuthController::class, 'login_admin'])->middleware('json');
 
-Route::post('/login', [AuthController::class, 'login_admin']);
 
 
 //Protected routes
@@ -20,7 +20,7 @@ Route::group(['middleware' => 'jwt.auth'], function () {
     Route::put('/edit-user/{id}' ,[AuthController::class , 'EditUser'])->middleware('roles:admin');
     Route::delete('/delete_user/{id}', [AuthController::class,'DeleteUser'])->middleware('roles:admin');
     Route::get('/deactivate_user/{id}', [AuthController::class,'DeactivateUser'])->middleware('roles:admin');
-    Route::get('/activate_user/{id}', [AuthController::class,'activateUser'])->middleware('roles:admin');
+    Route::get('/activate_user/{id}', [AuthController::class,'ActivateUser'])->middleware('roles:admin');
     //Products related routes
     Route::post('/product/add', [ProductController::class, 'AddProduct'])->middleware('roles:admin,editor');
     Route::get('/product/{id}/edit', [ProductController::class, 'EditProduct'])->middleware('roles:admin,editor');

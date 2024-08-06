@@ -18,7 +18,7 @@ class AuthController extends Controller
             'name' => ['required', 'string'],
             'last_name' => ['required' ,'string'],
             'email' => ['required', 'string', 'email', 'unique:users'],
-            'password' => ['required', 'string'],
+            'password' => ['required' , "string"],
             'roles' => ['required', 'array'],
             'roles.*' => 'exists:roles,name'
         ]);
@@ -59,8 +59,7 @@ class AuthController extends Controller
             "exp" => $expire_claim,
             "sub" => $id,
             "data" => [
-                "name" => $data['name'],
-                'email' => $data['email'],
+                "id" => $id,
             ]
         ];
 
@@ -73,24 +72,26 @@ class AuthController extends Controller
 
         //login validation
         $data = $request->validate([
-            'password' => 'required',
-            'email' => ['required','email']
+            'email' => ['required','email'],
+            'password' => ['required' , "string"],
         ]);
 
-        //login test
-        $token = auth()->attempt([
-            'password' => $data['password'],
-            'email' => $data['email']]
-        );
-        
-        $user = auth()->user();
-        $user_id = $user->id;
-        
-        //login fail
-        if(!$token){
-            return response()->json(["message" => "User not found" , "status" => false]);
+        $user = User::where('email' , $data['email'])->first();
+
+        if(!$user){
+            return response()->json(["message" => "Email incorrect" , "status" => false]);
         }
 
+        if(!auth()->attempt([
+            'email' => $data['email'],
+            'password' => $data['password'],
+        ])) {
+            return response()->json(["message" => "Password incorrect" , "status" => false]);
+        }
+
+
+        $user_id = auth()->user()->id;
+        
         $jwt = $this->generateToken($data,$user_id);
 
         //login success
@@ -184,7 +185,7 @@ class AuthController extends Controller
         return response()->json(["message" => "User not found." , "status" => false]);
         
     }
-    public function activateUser($id){
+    public function ActivateUser($id){
 
         $user = User::find($id);
 
