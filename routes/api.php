@@ -9,14 +9,18 @@ use App\Http\Controllers\ProductController;
 
 Route::post('/login', [AuthController::class, 'login_admin']);
 
+
 //Protected routes
 Route::group(['middleware' => 'jwt.auth'], function () {
     //Admin routes
     Route::post('/register', [AuthController::class,'AddUser'])->middleware('roles:admin');
     Route::post('/edit-roles/{id}', [AuthController::class,'EditRoles'])->middleware('roles:admin');
+    Route::get('/getUser/{id}' , [AuthController::class , 'GetUser'])->middleware('roles:admin');
+    Route::get('/getUsers' , [AuthController::class , 'GetAllUsers'])->middleware('roles:admin');
     Route::put('/edit-user/{id}' ,[AuthController::class , 'EditUser'])->middleware('roles:admin');
     Route::delete('/delete_user/{id}', [AuthController::class,'DeleteUser'])->middleware('roles:admin');
-    Route::delete('/deactivate_user/{id}', [AuthController::class,'DeactivateUser'])->middleware('roles:admin');
+    Route::get('/deactivate_user/{id}', [AuthController::class,'DeactivateUser'])->middleware('roles:admin');
+    Route::get('/activate_user/{id}', [AuthController::class,'activateUser'])->middleware('roles:admin');
     //Products related routes
     Route::post('/product/add', [ProductController::class, 'AddProduct'])->middleware('roles:admin,editor');
     Route::get('/product/{id}/edit', [ProductController::class, 'EditProduct'])->middleware('roles:admin,editor');

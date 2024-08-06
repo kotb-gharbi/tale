@@ -16,6 +16,7 @@ class AuthController extends Controller
         
         $data = $request->validate([
             'name' => ['required', 'string'],
+            'last_name' => ['required' ,'string'],
             'email' => ['required', 'string', 'email', 'unique:users'],
             'password' => ['required', 'string'],
             'roles' => ['required', 'array'],
@@ -32,10 +33,10 @@ class AuthController extends Controller
 
             $user->roles()->attach($roleIds);
 
-            return response()->json(["message" => "User created successfully"]);
+            return response()->json(["message" => "User created successfully", "status" => true]);
         }
 
-        return response()->json(["message" => "error while creating User"]);
+        return response()->json(["message" => "error while creating User" , "status" => false]);
         
     }
 
@@ -72,14 +73,12 @@ class AuthController extends Controller
 
         //login validation
         $data = $request->validate([
-            'name' => 'required',
             'password' => 'required',
             'email' => ['required','email']
         ]);
 
         //login test
         $token = auth()->attempt([
-            "name" => $data['name'],
             'password' => $data['password'],
             'email' => $data['email']]
         );
@@ -89,7 +88,7 @@ class AuthController extends Controller
         
         //login fail
         if(!$token){
-            return response()->json(["message" => "User not found"]);
+            return response()->json(["message" => "User not found" , "status" => false]);
         }
 
         $jwt = $this->generateToken($data,$user_id);
@@ -97,7 +96,8 @@ class AuthController extends Controller
         //login success
         return response()->json([
             "message" => "User logged in successfully",
-            "token" => $jwt
+            "token" => $jwt,
+            "status" => true
         ]);
 
     }
@@ -113,18 +113,18 @@ class AuthController extends Controller
         
 
         if (!$user) {
-            return response()->json(["message" => "User not authenticated"]);
+            return response()->json(["message" => "User not authenticated" , "status" => false]);
         }
 
         if(!Hash::check($data['current_pwd'] , $user->password)){
-            return response()->json(["message" => "wrong password"]);
+            return response()->json(["message" => "wrong password" , "status" => false]);
         }
 
         /** @var \App\Models\User $user **/
         $user->password = Hash::make($data['new_password']);
         $user->save();
 
-        return response()->json(["message" => "Password changed successfully"]);
+        return response()->json(["message" => "Password changed successfully" , "status" => true]);
 
         
     }
@@ -143,10 +143,10 @@ class AuthController extends Controller
         if($user){
             $user->roles()->sync($roleIds);
 
-            return response()->json(["message" => "Roles updated successfully"]);
+            return response()->json(["message" => "Roles updated successfully" , "status" => true]);
         }
 
-        return response()->json(["message" => "User not found"]);
+        return response()->json(["message" => "User not found" , "status" => false]);
         
 
     }
@@ -162,10 +162,10 @@ class AuthController extends Controller
             //detach all roles associated with that user
             $user->roles()->detach();
 
-            return response()->json(["message" => "User deleted successfully"]);
+            return response()->json(["message" => "User deleted successfully" , "status" => true]);
         }
 
-        return response()->json(["message" => "User not found"]);
+        return response()->json(["message" => "User not found" , "status" => false]);
     }
 
     public function DeactivateUser($id){
@@ -174,13 +174,30 @@ class AuthController extends Controller
 
         if($user){
 
-            //detach all roles
-            $user->roles()->detach();
+            //deactivate user
+            $user->status = false;
+            $user->save();
 
-            return response()->json(["message" => "All roles removed from user successfully."]);
+            return response()->json(["message" => "User deactivated" , "status" => true]);
         }
 
-        return response()->json(["message" => "User not found."]);
+        return response()->json(["message" => "User not found." , "status" => false]);
+        
+    }
+    public function activateUser($id){
+
+        $user = User::find($id);
+
+        if($user){
+
+            //activate user
+            $user->status = true;
+            $user->save();
+
+            return response()->json(["message" => "User deactivated" , "status" => true]);
+        }
+
+        return response()->json(["message" => "User not found." , "status" => false]);
         
     }
 
@@ -200,7 +217,7 @@ class AuthController extends Controller
 
 
         if(!$user){
-            return response()->json(["message" => "User not found"]);
+            return response()->json(["message" => "User not found" , "status" => false]);
         }
 
         $roleIds = Role::whereIn('name' , $data['roles'])->pluck('id')->toArray();
@@ -209,7 +226,29 @@ class AuthController extends Controller
 
         $user->update($data);
 
-        return response()->json(["message" => "User updated successfully"]);
+        return response()->json(["message" => "User updated successfully" , "status" => true]);
 
+    }
+
+    function GetUser($id){
+
+        $user = User::find($id);
+
+        if(!$user){
+            return response()->json(["message" => "User not found" , "status" => false]);
+        }
+
+        return response()->json($user);
+    }
+
+    function GetAllUsers(){
+
+        $users = User::all();
+        
+        if(!$users){
+            return response()->json(["message" => "No Users found" , "status" => false]);
+        }
+
+        return response()->json($users);
     }
 }
