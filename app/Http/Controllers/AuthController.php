@@ -5,8 +5,10 @@ namespace App\Http\Controllers;
 use App\Models\Role;
 use App\Models\User;
 use Firebase\JWT\JWT;
+use App\Models\SuperAdmin;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 
 class AuthController extends Controller
@@ -19,6 +21,14 @@ class AuthController extends Controller
             'last_name' => ['required' ,'string'],
             'email' => ['required', 'string', 'email', 'unique:users'],
             'password' => ['required' , "string"],
+            'status' => ['nullable', 'boolean'],
+            'birth' => ['date', 'nullable'],
+            'gender' => ['required' , 'in:male,female'],
+            'country' => ['string' , 'nullable'],
+            'tel' => ['string' , 'nullable'],
+            'address' => ['string' , 'nullable'],
+            'CodePostal' => ['string' , 'nullable'],
+            'profile_pic' => ['nullable', 'url'],
             'roles' => ['required', 'array'],
             'roles.*' => 'exists:roles,name'
         ]);
@@ -68,7 +78,7 @@ class AuthController extends Controller
         return $jwt;
     }
 
-    public function login_admin (Request $request){
+    public function SuperAdminLogin (Request $request){
 
         //login validation
         $data = $request->validate([
@@ -76,13 +86,13 @@ class AuthController extends Controller
             'password' => ['required' , "string"],
         ]);
 
-        $user = User::where('email' , $data['email'])->first();
+        $SuperAdmin = SuperAdmin::where('email' , $data['email'])->first();
 
-        if(!$user){
+        if(!$SuperAdmin){
             return response()->json(["message" => "Email incorrect" , "status" => false]);
         }
 
-        if(!auth()->attempt([
+        if(!Auth::guard('super_admin')->attempt([
             'email' => $data['email'],
             'password' => $data['password'],
         ])) {
@@ -90,18 +100,42 @@ class AuthController extends Controller
         }
 
 
-        $user_id = auth()->user()->id;
+        $SuperAdmin_id = Auth::guard('super_admin')->user()->id;
         
-        $jwt = $this->generateToken($data,$user_id);
+        $jwt = $this->generateToken($data,$SuperAdmin_id);
 
         //login success
         return response()->json([
-            "message" => "User logged in successfully",
+            "message" => "SuperAdmin logged in successfully",
             "token" => $jwt,
             "status" => true
         ]);
 
     }
+
+    public function SuperAdminRegister(Request $request){
+
+        $data = $request->validate([
+            'name' => ['required' , "string"],
+            'email' => ['required','email' , 'unique:super_admins'],
+            'password' => ['required' , "string" , "min:8"],
+            'profile_pic' => ['nullable', 'url'],
+            'roles' => ['nullable', 'string'],
+            
+        ]);
+
+        $data['password'] = bcrypt($data['password']);
+        
+        $superadmin = SuperAdmin::create($data);
+
+        if($superadmin){
+        
+                return response()->json(["message" => "super admin created successfully", "status" => true]);
+            }
+
+            return response()->json(["message" => "error while creating super admin" , "status" => false]);
+    }
+    
 
     public function ChangePassword(Request $request,int $id){
 
@@ -202,33 +236,41 @@ class AuthController extends Controller
         
     }
 
-    public function EditUser(Request $request, int $id){
+    public function EditName(Request $request, int $id){
 
-        $user = User::find($id);
         
-        $data = $request->validate([
-            'name' => ['required', 'string'],
-            'email' => ['required', 'string', 'email', Rule::unique('users')->ignore($user->id)],
-            'password' => ['required', 'string'],
-            'roles' => ['required', 'array'],
-            'roles.*' => 'exists:roles,name'
-        ]);
+    }
+    public function EditLastName(Request $request, int $id){
 
-        $data['password'] = bcrypt($data['password']);
-
-
-        if(!$user){
-            return response()->json(["message" => "User not found" , "status" => false]);
-        }
-
-        $roleIds = Role::whereIn('name' , $data['roles'])->pluck('id')->toArray();
         
-        $user->roles()->sync($roleIds);
+    }
+    public function EditDate(Request $request, int $id){
 
-        $user->update($data);
+        
+    }
+    public function EditGender(Request $request, int $id){
 
-        return response()->json(["message" => "User updated successfully" , "status" => true]);
+        
+    }
+    public function EditEmail(Request $request, int $id){
 
+        
+    }
+    public function EditCountry(Request $request, int $id){
+
+        
+    }
+    public function EditTel(Request $request, int $id){
+
+        
+    }
+    public function EditAddress(Request $request, int $id){
+
+        
+    }
+    public function EditCodePostal(Request $request, int $id){
+
+        
     }
 
     function GetUser($id){

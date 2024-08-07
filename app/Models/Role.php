@@ -17,4 +17,8 @@ class Role extends Model
     {
         return $this->belongsToMany(User::class);
     }
+    public function super_admins()
+    {
+        return $this->belongsToMany(SuperAdmin::class);
+    }
 }
