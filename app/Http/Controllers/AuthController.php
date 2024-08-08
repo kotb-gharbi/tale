@@ -5,10 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\Role;
 use App\Models\User;
 use Firebase\JWT\JWT;
-use App\Models\SuperAdmin;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 
 class AuthController extends Controller
@@ -86,56 +84,40 @@ class AuthController extends Controller
             'password' => ['required' , "string"],
         ]);
 
-        $SuperAdmin = SuperAdmin::where('email' , $data['email'])->first();
+        $user = User::where('email' , $data['email'])->first();
 
-        if(!$SuperAdmin){
+        if(!$user){
             return response()->json(["message" => "Email incorrect" , "status" => false]);
         }
 
-        if(!Auth::guard('super_admin')->attempt([
+        if(!auth()->attempt([
             'email' => $data['email'],
             'password' => $data['password'],
         ])) {
             return response()->json(["message" => "Password incorrect" , "status" => false]);
         }
 
+        //get super_admin role_id
+        $roleId = Role::whereIn('name', ['super_admin'])->pluck('id')->toArray();
+        //get user roles_ids
+        $userRoleIds = $user->roles->pluck('id')->toArray();
+        //check if user has super_admin role
+        if (!array_intersect($roleId, $userRoleIds)) {
+            return response()->json(["message" => "User does not have the required role", "status" => false]);
+        }
 
-        $SuperAdmin_id = Auth::guard('super_admin')->user()->id;
+        $user_id = auth()->user()->id;
         
-        $jwt = $this->generateToken($data,$SuperAdmin_id);
+        $jwt = $this->generateToken($data,$user_id);
 
         //login success
         return response()->json([
-            "message" => "SuperAdmin logged in successfully",
+            "message" => "User logged in successfully",
             "token" => $jwt,
             "status" => true
         ]);
 
     }
-
-    public function SuperAdminRegister(Request $request){
-
-        $data = $request->validate([
-            'name' => ['required' , "string"],
-            'email' => ['required','email' , 'unique:super_admins'],
-            'password' => ['required' , "string" , "min:8"],
-            'profile_pic' => ['nullable', 'url'],
-            'roles' => ['nullable', 'string'],
-            
-        ]);
-
-        $data['password'] = bcrypt($data['password']);
-        
-        $superadmin = SuperAdmin::create($data);
-
-        if($superadmin){
-        
-                return response()->json(["message" => "super admin created successfully", "status" => true]);
-            }
-
-            return response()->json(["message" => "error while creating super admin" , "status" => false]);
-    }
-    
 
     public function ChangePassword(Request $request,int $id){
 

@@ -7,30 +7,30 @@ use App\Http\Controllers\ProductController;
 
 //Open routes
 Route::post('/login', [AuthController::class, 'SuperAdminLogin'])->middleware('json');
-Route::post('/registerSuperadmin', [AuthController::class,'SuperAdminRegister'])->middleware('json');
+
 
 
 
 //Protected routes
 Route::group(['middleware' => 'jwt.auth'], function () {
     //Admin routes
-    Route::post('/register', [AuthController::class,'AddUser'])->middleware(['json' , 'roles:admin' ]);
-    Route::post('/edit-roles/{id}', [AuthController::class,'EditRoles'])->middleware(['json' , 'roles:admin' ]);
-    Route::get('/getUser/{id}' , [AuthController::class , 'GetUser'])->middleware(['json' , 'roles:admin' ]);
-    Route::get('/getUsers' , [AuthController::class , 'GetAllUsers'])->middleware(['json' , 'roles:admin' ]);
-    Route::put('/edit-name/{id}' ,[AuthController::class , 'EditName'])->middleware(['json' , 'roles:admin' ]);
-    Route::put('/edit-lastname/{id}' ,[AuthController::class , 'EditLastName'])->middleware(['json' , 'roles:admin' ]);
-    Route::put('/edit-date/{id}' ,[AuthController::class , 'EditDate'])->middleware(['json' , 'roles:admin' ]);
-    Route::put('/edit-gender/{id}' ,[AuthController::class , 'EditGender'])->middleware(['json' , 'roles:admin' ]);
-    Route::put('/edit-email/{id}' ,[AuthController::class , 'EditEmail'])->middleware(['json' , 'roles:admin' ]);
-    Route::put('/edit-country/{id}' ,[AuthController::class , 'EditCountry'])->middleware(['json' , 'roles:admin' ]);
-    Route::put('/edit-tel/{id}' ,[AuthController::class , 'EditTel'])->middleware(['json' , 'roles:admin' ]);
-    Route::put('/edit-address/{id}' ,[AuthController::class , 'EditAddress'])->middleware(['json' , 'roles:admin' ]);
-    Route::put('/edit-codepostal/{id}' ,[AuthController::class , 'EditUser'])->middleware(['json' , 'roles:admin' ]);
-    Route::post('/change-password/{id}', [AuthController::class, 'ChangePassword'])->middleware(['json' , 'roles:admin' ]);
-    Route::delete('/delete_user/{id}', [AuthController::class,'DeleteUser'])->middleware(['json' , 'roles:admin' ]);
-    Route::get('/deactivate_user/{id}', [AuthController::class,'DeactivateUser'])->middleware(['json' , 'roles:admin' ]);
-    Route::get('/activate_user/{id}', [AuthController::class,'ActivateUser'])->middleware(['json' , 'roles:admin' ]);
+    Route::post('/register', [AuthController::class,'AddUser'])->middleware(['json' , 'roles:admin,super_admin' ]);
+    Route::post('/edit-roles/{id}', [AuthController::class,'EditRoles'])->middleware(['json' , 'roles:admin,super_admin' ]);
+    Route::get('/getUser/{id}' , [AuthController::class , 'GetUser'])->middleware(['json' , 'roles:admin,super_admin' ]);
+    Route::get('/getUsers' , [AuthController::class , 'GetAllUsers'])->middleware(['json' , 'roles:admin,super_admin' ]);
+    Route::put('/edit-name/{id}' ,[AuthController::class , 'EditName'])->middleware(['json' , 'roles:admin,super_admin' ]);
+    Route::put('/edit-lastname/{id}' ,[AuthController::class , 'EditLastName'])->middleware(['json' , 'roles:admin,super_admin' ]);
+    Route::put('/edit-date/{id}' ,[AuthController::class , 'EditDate'])->middleware(['json' , 'roles:admin,super_admin' ]);
+    Route::put('/edit-gender/{id}' ,[AuthController::class , 'EditGender'])->middleware(['json' , 'roles:admin,super_admin' ]);
+    Route::put('/edit-email/{id}' ,[AuthController::class , 'EditEmail'])->middleware(['json' , 'roles:admin,super_admin' ]);
+    Route::put('/edit-country/{id}' ,[AuthController::class , 'EditCountry'])->middleware(['json' , 'roles:admin,super_admin' ]);
+    Route::put('/edit-tel/{id}' ,[AuthController::class , 'EditTel'])->middleware(['json' , 'roles:admin,super_admin' ]);
+    Route::put('/edit-address/{id}' ,[AuthController::class , 'EditAddress'])->middleware(['json' , 'roles:admin,super_admin' ]);
+    Route::put('/edit-codepostal/{id}' ,[AuthController::class , 'EditUser'])->middleware(['json' , 'roles:admin,super_admin' ]);
+    Route::post('/change-password/{id}', [AuthController::class, 'ChangePassword'])->middleware(['json' , 'roles:admin,super_admin' ]);
+    Route::delete('/delete_user/{id}', [AuthController::class,'DeleteUser'])->middleware(['json' , 'roles:admin,super_admin' ]);
+    Route::get('/deactivate_user/{id}', [AuthController::class,'DeactivateUser'])->middleware(['json' , 'roles:admin,super_admin' ]);
+    Route::get('/activate_user/{id}', [AuthController::class,'ActivateUser'])->middleware(['json' , 'roles:admin,super_admin' ]);
     //Products related routes
     Route::post('/product/add', [ProductController::class, 'AddProduct'])->middleware('roles:admin,editor');
     Route::get('/product/{id}/edit', [ProductController::class, 'EditProduct'])->middleware('roles:admin,editor');

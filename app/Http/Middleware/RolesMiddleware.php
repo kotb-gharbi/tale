@@ -17,9 +17,6 @@ class RolesMiddleware
      */
     public function handle(Request $request, Closure $next, ...$roles): Response
     {
-        if(Auth::guard('super_admin')->user()->role === 'super_admin'){
-            return $next($request);
-        }
         $user = Auth::user();
         /** @var \App\Models\User $user **/
         if ($user && $user->hasAnyRole($roles)) {

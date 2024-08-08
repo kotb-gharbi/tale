@@ -1,7 +1,6 @@
 <?php
 
 use App\Http\Middleware\CheckJsonContentType;
-use App\Http\Middleware\CheckSuperAdmin;
 use App\Http\Middleware\RolesMiddleware;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
@@ -17,8 +16,7 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware) {
         $middleware->alias([
             'roles' => RolesMiddleware::class,
-            'json' => CheckJsonContentType::class,
-            'super_admin' => CheckSuperAdmin::class
+            'json' => CheckJsonContentType::class
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
