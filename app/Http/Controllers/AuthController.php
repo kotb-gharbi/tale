@@ -122,8 +122,7 @@ class AuthController extends Controller
     public function ChangePassword(Request $request,int $id){
 
         $data = $request->validate([
-            "current_pwd" => 'required',
-            'new_password' => ['required','min:8']
+            'password' => ['required','min:8']
         ]);
 
         $user = User::find($id);
@@ -133,12 +132,9 @@ class AuthController extends Controller
             return response()->json(["message" => "User not authenticated" , "status" => false]);
         }
 
-        if(!Hash::check($data['current_pwd'] , $user->password)){
-            return response()->json(["message" => "wrong password" , "status" => false]);
-        }
 
         /** @var \App\Models\User $user **/
-        $user->password = Hash::make($data['new_password']);
+        $user->password = Hash::make($data['password']);
         $user->save();
 
         return response()->json(["message" => "Password changed successfully" , "status" => true]);
@@ -220,37 +216,173 @@ class AuthController extends Controller
 
     public function EditName(Request $request, int $id){
 
+        $user = User::find($id);
+
+        if(!$user){
+            return response()->json(["message" => "User not found." , "status" => false]);
+        }
+
+        $data = $request->validate([
+            'name' => ['required' ,'string']
+        ]);
+
+        $user->name = $data['name'];
+        $user->save();
+
+        return response()->json(['message' => 'User name updated successfully' , 'status' => true]);
+
+
+
         
     }
     public function EditLastName(Request $request, int $id){
 
-        
+        $user = User::find($id);
+
+        if(!$user){
+            return response()->json(["message" => "User not found." , "status" => false]);
+        }
+
+        $data = $request->validate([
+            'last_name' => ['required' ,'string']
+        ]);
+
+        $user->last_name = $data['last_name'];
+        $user->save();
+
+        return response()->json(['message' => 'User last_name updated successfully' , 'status' => true]);
+
     }
-    public function EditDate(Request $request, int $id){
+    public function EditBirthDate(Request $request, int $id){
+
+        $user = User::find($id);
+
+        if(!$user){
+            return response()->json(["message" => "User not found." , "status" => false]);
+        }
+
+        $data = $request->validate([
+            'birth' => ['required' ,'date']
+        ]);
+
+        $user->birth = $data['birth'];
+        $user->save();
+
+        return response()->json(['message' => 'User Birth date updated successfully' , 'status' => true]);
 
         
     }
     public function EditGender(Request $request, int $id){
 
+        $user = User::find($id);
+
+        if(!$user){
+            return response()->json(["message" => "User not found." , "status" => false]);
+        }
+
+        $data = $request->validate([
+            'gender' => ['required' ,'in:male,female']
+        ]);
+
+        $user->gender = $data['gender'];
+        $user->save();
+
+        return response()->json(['message' => 'User gender updated successfully' , 'status' => true]);
+
         
     }
     public function EditEmail(Request $request, int $id){
+
+        $user = User::find($id);
+
+        if(!$user){
+            return response()->json(["message" => "User not found." , "status" => false]);
+        }
+
+        $data = $request->validate([
+            'email' => ['required','string','email' , 'unique:users']
+        ]);
+
+        $user->email = $data['email'];
+        $user->save();
+
+        return response()->json(['message' => 'User email updated successfully' , 'status' => true]);
 
         
     }
     public function EditCountry(Request $request, int $id){
 
+        $user = User::find($id);
+
+        if(!$user){
+            return response()->json(["message" => "User not found." , "status" => false]);
+        }
+
+        $data = $request->validate([
+            'country' => ['required' ,'string']
+        ]);
+
+        $user->country = $data['country'];
+        $user->save();
+
+        return response()->json(['message' => 'User country updated successfully' , 'status' => true]);
+
         
     }
     public function EditTel(Request $request, int $id){
+
+        $user = User::find($id);
+
+        if(!$user){
+            return response()->json(["message" => "User not found." , "status" => false]);
+        }
+
+        $data = $request->validate([
+            'tel' => ['required' ,'string']
+        ]);
+
+        $user->tel = $data['tel'];
+        $user->save();
+
+        return response()->json(['message' => 'User phone number updated successfully' , 'status' => true]);
 
         
     }
     public function EditAddress(Request $request, int $id){
 
+        $user = User::find($id);
+
+        if(!$user){
+            return response()->json(["message" => "User not found." , "status" => false]);
+        }
+
+        $data = $request->validate([
+            'address' => ['required' ,'string']
+        ]);
+
+        $user->address = $data['address'];
+        $user->save();
+
+        return response()->json(['message' => 'User address updated successfully' , 'status' => true]);
+
         
     }
     public function EditCodePostal(Request $request, int $id){
+
+        $user = User::find($id);
+
+        if(!$user){
+            return response()->json(["message" => "User not found." , "status" => false]);
+        }
+
+        $data = $request->validate([
+            'CodePostal' => ['required' ,'string']
+        ]);
+
+        $user->CodePostal = $data['CodePostal'];
+        $user->save();
+
+        return response()->json(['message' => 'User CodePostal updated successfully' , 'status' => true]);
 
         
     }
@@ -268,7 +400,12 @@ class AuthController extends Controller
 
     function GetAllUsers(){
 
-        $users = User::all();
+        $roleId = Role::where('name', 'super_admin')->pluck('id')->first();
+        //get all users who don't have super_admin role
+        $users = User::whereDoesntHave('roles', function($query) use ($roleId) {
+            $query->where('role_id', $roleId);
+        })->get();
+        
         
         if(!$users){
             return response()->json(["message" => "No Users found" , "status" => false]);
