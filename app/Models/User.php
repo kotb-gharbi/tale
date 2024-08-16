@@ -29,7 +29,9 @@ class User extends Authenticatable implements JWTSubject
         'address',
         'CodePostal',
         'country',
-        'status'
+        'status',
+        'banned',
+        'ban_reason'
     ];
 
     /**

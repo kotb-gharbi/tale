@@ -89,7 +89,7 @@ class AuthController extends Controller
         if(!$user){
             return response()->json(["message" => "Email incorrect" , "status" => false]);
         }
-
+        
         if(!auth()->attempt([
             'email' => $data['email'],
             'password' => $data['password'],
@@ -262,7 +262,7 @@ class AuthController extends Controller
         }
 
         $data = $request->validate([
-            'birth' => ['required' ,'date']
+            'birth' => ['nullable' ,'date']
         ]);
 
         $user->birth = $data['birth'];
@@ -300,8 +300,14 @@ class AuthController extends Controller
         }
 
         $data = $request->validate([
-            'email' => ['required','string','email' , 'unique:users']
+            'email' => ['required','string','email']
         ]);
+
+        $email_val = User::where('email' , $data['email'])->first();
+
+        if($email_val){
+            return response()->json(["message" => "Email already taken" , 'status' => false]);
+        }
 
         $user->email = $data['email'];
         $user->save();
@@ -319,7 +325,7 @@ class AuthController extends Controller
         }
 
         $data = $request->validate([
-            'country' => ['required' ,'string']
+            'country' => ['nullable' ,'string']
         ]);
 
         $user->country = $data['country'];
@@ -338,7 +344,7 @@ class AuthController extends Controller
         }
 
         $data = $request->validate([
-            'tel' => ['required' ,'string']
+            'tel' => ['nullable' ,'string']
         ]);
 
         $user->tel = $data['tel'];
@@ -357,7 +363,7 @@ class AuthController extends Controller
         }
 
         $data = $request->validate([
-            'address' => ['required' ,'string']
+            'address' => ['nullable' ,'string']
         ]);
 
         $user->address = $data['address'];
@@ -376,7 +382,7 @@ class AuthController extends Controller
         }
 
         $data = $request->validate([
-            'CodePostal' => ['required' ,'string']
+            'CodePostal' => ['nullable' ,'string']
         ]);
 
         $user->CodePostal = $data['CodePostal'];
@@ -404,13 +410,38 @@ class AuthController extends Controller
         //get all users who don't have super_admin role
         $users = User::whereDoesntHave('roles', function($query) use ($roleId) {
             $query->where('role_id', $roleId);
-        })->get();
-        
-        
+        })->with(['roles' => function($query) {
+            $query->select('roles.name');
+        }])->get();
+
+    
         if(!$users){
             return response()->json(["message" => "No Users found" , "status" => false]);
         }
+        
 
         return response()->json($users);
+    }
+
+    function EditStatus( Request $request , $id){
+
+        $user = User::find($id);
+
+        if(!$user){
+            return response()->json(["message" => "User not found" , "status" => false]);
+        }
+
+        $data = $request->validate([
+            "banned" => ['required' , 'boolean']
+        ]);
+
+        $user->banned = $data["banned"];
+
+        if ($user->banned == 0) {
+            $user->ban_reason = ''; 
+        }
+        $user->save();
+
+        return response()->json(["message" => "status updated successfully" , "status" => true]);
     }
 }
