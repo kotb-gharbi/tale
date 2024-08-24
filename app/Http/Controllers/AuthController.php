@@ -48,6 +48,10 @@ class AuthController extends Controller
         
     }
 
+    public function AllRoles(){
+        $roles = Role::all();
+        return response()->json($roles);
+    }
 
 
     public function generateToken($data,$id){
@@ -179,39 +183,6 @@ class AuthController extends Controller
         }
 
         return response()->json(["message" => "User not found" , "status" => false]);
-    }
-
-    public function DeactivateUser($id){
-
-        $user = User::find($id);
-
-        if($user){
-
-            //deactivate user
-            $user->status = false;
-            $user->save();
-
-            return response()->json(["message" => "User deactivated" , "status" => true]);
-        }
-
-        return response()->json(["message" => "User not found." , "status" => false]);
-        
-    }
-    public function ActivateUser($id){
-
-        $user = User::find($id);
-
-        if($user){
-
-            //activate user
-            $user->status = true;
-            $user->save();
-
-            return response()->json(["message" => "User deactivated" , "status" => true]);
-        }
-
-        return response()->json(["message" => "User not found." , "status" => false]);
-        
     }
 
     public function EditName(Request $request, int $id){
@@ -393,7 +364,7 @@ class AuthController extends Controller
         
     }
 
-    function GetUser($id){
+    public function GetUser($id){
 
         $user = User::find($id);
 
@@ -404,7 +375,7 @@ class AuthController extends Controller
         return response()->json($user);
     }
 
-    function GetAllUsers(){
+    public function GetAllUsers(){
 
         $roleId = Role::where('name', 'super_admin')->pluck('id')->first();
         //get all users who don't have super_admin role
@@ -423,7 +394,7 @@ class AuthController extends Controller
         return response()->json($users);
     }
 
-    function EditStatus( Request $request , $id){
+    public function EditStatus($id){
 
         $user = User::find($id);
 
@@ -431,17 +402,10 @@ class AuthController extends Controller
             return response()->json(["message" => "User not found" , "status" => false]);
         }
 
-        $data = $request->validate([
-            "banned" => ['required' , 'boolean']
-        ]);
-
-        $user->banned = $data["banned"];
-
-        if ($user->banned == 0) {
-            $user->ban_reason = ''; 
-        }
+        $user->status = $user->status == 1 ? 0 : 1;
         $user->save();
 
-        return response()->json(["message" => "status updated successfully" , "status" => true]);
+        return response()->json(["message" => "Status updated successfully", "status" => true]);
+        
     }
 }

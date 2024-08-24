@@ -17,6 +17,7 @@ Route::group(['middleware' => 'jwt.auth'], function () {
     Route::post('/register', [AuthController::class,'AddUser'])->middleware(['json' , 'roles:admin,super_admin' ]);
     Route::post('/edit-roles/{id}', [AuthController::class,'EditRoles'])->middleware(['json' , 'roles:admin,super_admin' ]);
     Route::get('/getUser/{id}' , [AuthController::class , 'GetUser'])->middleware(['json' , 'roles:admin,super_admin' ]);
+    Route::get('/edit-status/{id}' , [AuthController::class , 'EditStatus'])->middleware(['json' , 'roles:admin,super_admin' ]);
     Route::put('/edit-name/{id}' ,[AuthController::class , 'EditName'])->middleware(['json' , 'roles:admin,super_admin' ]);
     Route::put('/edit-lastname/{id}' ,[AuthController::class , 'EditLastName'])->middleware(['json' , 'roles:admin,super_admin' ]);
     Route::put('/edit-birth/{id}' ,[AuthController::class , 'EditBirthDate'])->middleware(['json' , 'roles:admin,super_admin' ]);
@@ -28,8 +29,7 @@ Route::group(['middleware' => 'jwt.auth'], function () {
     Route::put('/edit-codepostal/{id}' ,[AuthController::class , 'EditCodePostal'])->middleware(['json' , 'roles:admin,super_admin' ]);
     Route::put('/change-password/{id}', [AuthController::class, 'ChangePassword'])->middleware(['json' , 'roles:admin,super_admin' ]);
     Route::delete('/delete_user/{id}', [AuthController::class,'DeleteUser'])->middleware(['json' , 'roles:admin,super_admin' ]);
-    Route::get('/deactivate_user/{id}', [AuthController::class,'DeactivateUser'])->middleware(['json' , 'roles:admin,super_admin' ]);
-    Route::get('/activate_user/{id}', [AuthController::class,'ActivateUser'])->middleware(['json' , 'roles:admin,super_admin' ]);
+    Route::get('/AllRoles', [AuthController::class, 'AllRoles'])->middleware(['json' , 'roles:admin,super_admin' ]);
     //Products related routes
     Route::post('/product/add', [ProductController::class, 'AddProduct'])->middleware('roles:admin,editor');
     Route::get('/product/{id}/edit', [ProductController::class, 'EditProduct'])->middleware('roles:admin,editor');
